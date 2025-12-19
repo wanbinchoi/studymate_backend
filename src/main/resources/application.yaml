@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: studymate
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/studymate?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: root # MySQL 비밀번호 설정
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true #SQL 쿼리 콘솔 출력
+    properties:
+      hibernate:
+        format_sql: true #SQL 쿼리 포맷팅
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type: trace
