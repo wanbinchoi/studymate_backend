@@ -10,13 +10,26 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true #SQL 쿼리 콘솔 출력
     properties:
       hibernate:
         format_sql: true #SQL 쿼리 포맷팅
+        use_sql_comments: true #어떤 작업인지 주석 추가
+        default_batch_fetch_size: 100 #LAZY 로딩 시 최대 100개씩 묶어서 갖고옴
+
+  data:
+    web:
+      pageable:
+        default-page-size: 20
+        max-page-size: 100
+        one-indexed-parameters: true
 
 logging:
   level:
     org.hibernate.SQL: debug
-    org.hibernate.type: trace
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+jwt:
+  secret: studymate-secret-key-for-jwt-token-generation-please-change-this-in-production-environment-minimum-256-bits
+  access-token-expiration: 3600000
