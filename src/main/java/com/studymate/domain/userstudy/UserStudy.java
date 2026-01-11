@@ -3,10 +3,7 @@ package com.studymate.domain.userstudy;
 import com.studymate.domain.study.Study;
 import com.studymate.domain.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "user_study", uniqueConstraints = @UniqueConstraint(columnNames = {"user_num", "study_num"}))
 public class UserStudy {
 

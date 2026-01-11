@@ -28,21 +28,21 @@ public class StudyDetailResponseDto {
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalDateTime studyCreatedAt;
-    private User leaderId;
+    private String leaderId;
     private List<String> cgNms;
 
-    public static StudyDetailResponseDto from(Study study, List<StudyCategory> studyCategories){
+    public static StudyDetailResponseDto from(Study study, List<StudyCategory> studyCategories, Integer currentMember){
         return StudyDetailResponseDto.builder()
                 .studyNum(study.getStudyNum())
                 .studyTitle(study.getStudyTitle())
                 .studyDesc(study.getStudyDesc())
                 .maxMember(study.getMaxMember())
-                .currentMember(0)
+                .currentMember(currentMember)
                 .studyStatus(study.getStudyStatus())
                 .startDate(study.getStartDate())
                 .endDate(study.getEndDate())
                 .studyCreatedAt(study.getStudyCreatedAt())
-                .leaderId(study.getLeaderId())
+                .leaderId(study.getLeaderId().getUserId())
                 .cgNms(studyCategories.stream()
                         .map(sc -> sc.getCategory().getCgNm())
                         .collect(Collectors.toList()))

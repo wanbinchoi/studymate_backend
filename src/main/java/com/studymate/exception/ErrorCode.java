@@ -14,6 +14,7 @@ public enum ErrorCode {
     INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, "E002", "시작일은 종료일보다 이전이어야 합니다."),
     STUDY_CAPACITY_EXCEEDED(HttpStatus.BAD_REQUEST, "E003", "스터디 정원이 초과되었습니다."),
     DUPLICATE_CATEGORY(HttpStatus.BAD_REQUEST, "E004", "중복된 카테고리를 선택할 수 없습니다."),
+    ALREADY_JOINED(HttpStatus.BAD_REQUEST, "E005", "이미 참여한 스터디입니다."),
 
     //401 Unauthorized
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "E101", "인증이 유효하지 않습니다."),
@@ -27,6 +28,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "E301", "사용자를 찾을 수 없습니다."),
     STUDY_NOT_FOUND(HttpStatus.NOT_FOUND, "E302", "스터디를 찾을 수 없습니다."),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "E303", "카테고리를 찾을 수 없습니다."),
+    USER_STUDY_NOT_FOUND(HttpStatus.NOT_FOUND, "E304", "참여 기록을 찾을 수 없습니다."),
 
     //500 Internal Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E999", "서버 내부 오류가 발생했습니다.");

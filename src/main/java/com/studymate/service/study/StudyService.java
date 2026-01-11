@@ -19,6 +19,7 @@ import com.studymate.repository.category.CategoryRepository;
 import com.studymate.repository.study.StudyRepository;
 import com.studymate.repository.studycategory.StudyCategoryRepository;
 import com.studymate.repository.user.UserRepository;
+import com.studymate.repository.userstudy.UserStudyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +43,7 @@ public class StudyService {
     private final StudyRepository studyRepository;
     private final CategoryRepository categoryRepository;
     private final StudyCategoryRepository studyCategoryRepository;
+    private final UserStudyRepository userStudyRepository;
 
     private User getCurrentUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -83,8 +85,9 @@ public class StudyService {
         }
 
         List<StudyCategory> studyCategories = studyCategoryRepository.findByStudy_StudyNum(study.getStudyNum());
+        int currentMember = userStudyRepository.countByStudy_StudyNum(savedStudy.getStudyNum());
 
-        return StudyDetailResponseDto.from(savedStudy, studyCategories);
+        return StudyDetailResponseDto.from(savedStudy, studyCategories, currentMember);
     }
 
     @Transactional
@@ -151,8 +154,9 @@ public class StudyService {
             }
         }
         List<StudyCategory> studyCategories = studyCategoryRepository.findByStudy_StudyNum(studyNum);
+        int currentMember = userStudyRepository.countByStudy_StudyNum(studyNum);
 
-        return StudyDetailResponseDto.from(study, studyCategories);
+        return StudyDetailResponseDto.from(study, studyCategories, currentMember);
     }
 
     @Transactional
@@ -208,6 +212,11 @@ public class StudyService {
         //   4: [{백엔드}, {프론트엔드}, {데브옵스}]
         // } - studyNum으로 즉시 조회 가능 (O(1))
 
+        Map<Long, Integer> memberCountMap = studyNums.stream()
+                .collect(Collectors.toMap(
+                        studyNum -> studyNum,
+                        userStudyRepository::countByStudy_StudyNum
+                ));
 
         //DTO로 변환
         Page<StudyListResponseDto> dtoPage = studyPage.map(study -> {
@@ -216,8 +225,12 @@ public class StudyService {
             //get()과 getOrDefault()
             // get은 없는 키값일 경우 null을 반환하여 NullPointerException 발생할 수도 있지만
             // getOrDefaul는 없는 값일 경우 빈 배열을 반환하여 안전하게 처리할 수 있다.
-            return StudyListResponseDto.from(study, studyCategories);
+
+            Integer currentMember = memberCountMap.getOrDefault(study.getStudyNum(), 0);
+
+            return StudyListResponseDto.from(study, studyCategories, currentMember);
         });
+
         return dtoPage;
     }
 
@@ -227,7 +240,9 @@ public class StudyService {
                 .orElseThrow(() -> new StudyNotFoundException(studyNum));
         List<StudyCategory> studyCategories = studyCategoryRepository.findByStudy_StudyNum(studyNum);
 
-        return StudyDetailResponseDto.from(study, studyCategories);
+        int currentMember = userStudyRepository.countByStudy_StudyNum(studyNum);
+
+        return StudyDetailResponseDto.from(study, studyCategories, currentMember);
     }
 
     private void validateDateRange(LocalDate startDate, LocalDate endDate){

@@ -23,7 +23,7 @@ public class StudyController {
     public ResponseEntity<StudyDetailResponseDto> createStudy(@Valid @RequestBody StudyCreateRequestDto dto){
         StudyDetailResponseDto study = studyService.createStudy(dto);
 
-        return ResponseEntity.ok(study);
+        return ResponseEntity.status(201).body(study);
     }
 
     @GetMapping
@@ -46,9 +46,9 @@ public class StudyController {
     }
 
     @DeleteMapping("/{studyNum}")
-    public ResponseEntity<String> deleteStudy(@PathVariable Long studyNum){
+    public ResponseEntity<Void> deleteStudy(@PathVariable Long studyNum){
         studyService.deleteStudy(studyNum);
 
-        return ResponseEntity.ok("삭제가 완료되었습니다.");
+        return ResponseEntity.noContent().build();
     }
 }

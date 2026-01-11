@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
        ErrorResponse response = ErrorResponse.builder()
                .status(e.getErrorCode().getStatus().value())
                .code(e.getErrorCode().getCode())
-               .message(e.getMessage())
+               .message(e.getErrorCode().getMessage()) //기본메세지만 제공
                .timestamp(LocalDateTime.now())
                .build();
 

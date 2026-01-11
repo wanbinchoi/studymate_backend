@@ -29,13 +29,13 @@ public class StudyListResponseDto {
     private String leaderId;
     private List<String> cgNms;
 
-    public static StudyListResponseDto from(Study study, List<StudyCategory> studyCategories){
+    public static StudyListResponseDto from(Study study, List<StudyCategory> studyCategories, Integer currentMember){
         return StudyListResponseDto.builder()
                 .studyNum(study.getStudyNum())
                 .studyTitle(study.getStudyTitle())
                 .studyDesc(study.getStudyDesc())
                 .maxMember(study.getMaxMember())
-                .currentMember(0)
+                .currentMember(currentMember)
                 .studyStatus(study.getStudyStatus())
                 .startDate(study.getStartDate())
                 .endDate(study.getEndDate())

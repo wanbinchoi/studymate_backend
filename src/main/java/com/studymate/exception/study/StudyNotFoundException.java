@@ -9,8 +9,8 @@ public class StudyNotFoundException extends NotFoundException {
         super(ErrorCode.STUDY_NOT_FOUND);
     }
 
-    public StudyNotFoundException(Long studyNum){
-        super(ErrorCode.STUDY_NOT_FOUND,
-                String.format("스터디를 찾을 수 없습니다. (studyNum: %d)", studyNum));
+    public StudyNotFoundException(Long studyNum) {
+        super(ErrorCode.STUDY_NOT_FOUND
+            ,String.format("스터디를 찾을 수 없습니다. (studyNum: %d)", studyNum));
     }
 }
