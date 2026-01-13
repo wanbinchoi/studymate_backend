@@ -4,10 +4,8 @@ import com.studymate.domain.category.Category;
 import com.studymate.domain.study.Study;
 import com.studymate.domain.studycategory.StudyCategory;
 import com.studymate.domain.user.User;
-import com.studymate.dto.study.StudyCreateRequestDto;
-import com.studymate.dto.study.StudyDetailResponseDto;
-import com.studymate.dto.study.StudyListResponseDto;
-import com.studymate.dto.study.StudyUpdateRequestDto;
+import com.studymate.domain.userstudy.UserStudy;
+import com.studymate.dto.study.*;
 import com.studymate.exception.ErrorCode;
 import com.studymate.exception.InvalidRequestException;
 import com.studymate.exception.UnauthorizedException;
@@ -262,5 +260,76 @@ public class StudyService {
         if(uniqueIds.size() != categoryIds.size()){
             throw new InvalidRequestException(ErrorCode.DUPLICATE_CATEGORY);
         }
+    }
+    @Transactional
+    public StudyDetailResponseDto transferLeader(Long studyNum, TransferLeaderRequestDto dto){
+        User user = getCurrentUser();
+        Study study = studyRepository.findById(studyNum)
+                .orElseThrow(() -> new StudyNotFoundException(studyNum));
+
+        if(!study.getLeaderId().getUserId().equals(user.getUserId())){
+            throw new StudyAccessDeniedException(studyNum, user.getUserId());
+        }
+
+        if (user.getUserId().equals(dto.getNewLeaderId())) {
+            throw new InvalidRequestException(ErrorCode.SELF_TRANSFER_NOT_ALLOWED);
+        }
+
+        User transferUser = userRepository.findByUserId(dto.getNewLeaderId())
+                .orElseThrow(() -> new UserNotFoundException(dto.getNewLeaderId()));
+        UserStudy transferUserStudy = userStudyRepository.findByUser_UserNumAndStudy_StudyNum(transferUser.getUserNum(), studyNum)
+                .orElseThrow(() -> new InvalidRequestException(ErrorCode.USER_NOT_MEMBER));
+
+        boolean isCurrentLeaderMember = userStudyRepository.existsByUser_UserNumAndStudy_StudyNum(user.getUserNum(), studyNum);
+
+        if(!isCurrentLeaderMember){
+            UserStudy userStudy = UserStudy.builder()
+                    .user(user)
+                    .study(study)
+                    .studyRole("MEMBER")
+                    .build();
+            userStudyRepository.save(userStudy);
+        }
+
+        study.setLeaderId(transferUser);
+
+        transferUserStudy.setStudyRole("LEADER");
+
+        List<StudyCategory> studyCategories =
+                studyCategoryRepository.findByStudy_StudyNum(studyNum);
+        int currentMember =
+                userStudyRepository.countByStudy_StudyNum(studyNum);
+
+        return StudyDetailResponseDto.from(study, studyCategories, currentMember);
+    }
+    public void validateStatusTransition(String currentStatus, String newStatus){
+
+        if("COMPLETED".equals(currentStatus)){
+            throw new InvalidRequestException(ErrorCode.INVALID_STATUS_TRANSITION);
+        }
+
+        if ("IN_PROGRESS".equals(currentStatus) && "RECRUITING".equals(newStatus)) {
+            throw new InvalidRequestException(ErrorCode.INVALID_STATUS_TRANSITION);
+        }
+    }
+    @Transactional
+    public StudyDetailResponseDto updateStudyStatus(Long studyNum, UpdateStudyStatusDto dto){
+
+        User user = getCurrentUser();
+
+        Study study = studyRepository.findById(studyNum)
+                .orElseThrow(() -> new StudyNotFoundException(studyNum));
+
+        if(!study.getLeaderId().getUserNum().equals(user.getUserNum())){
+            throw new StudyAccessDeniedException(studyNum, user.getUserId());
+        }
+        validateStatusTransition(study.getStudyStatus(), dto.getStatus());
+        study.setStudyStatus(dto.getStatus());
+
+        List<StudyCategory> studyCategories = studyCategoryRepository.findByStudy_StudyNum(studyNum);
+        int currentMember = userStudyRepository.countByStudy_StudyNum(studyNum);
+
+        return StudyDetailResponseDto.from(study, studyCategories, currentMember);
+
     }
 }

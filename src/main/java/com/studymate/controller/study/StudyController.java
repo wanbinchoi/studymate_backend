@@ -1,10 +1,8 @@
 package com.studymate.controller.study;
 
-import com.studymate.dto.study.StudyCreateRequestDto;
-import com.studymate.dto.study.StudyDetailResponseDto;
-import com.studymate.dto.study.StudyListResponseDto;
-import com.studymate.dto.study.StudyUpdateRequestDto;
+import com.studymate.dto.study.*;
 import com.studymate.service.study.StudyService;
+import com.studymate.service.userstudy.UserStudyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class StudyController {
 
     private final StudyService studyService;
+    private final UserStudyService userStudyService;
 
     @PostMapping
     public ResponseEntity<StudyDetailResponseDto> createStudy(@Valid @RequestBody StudyCreateRequestDto dto){
@@ -50,5 +49,21 @@ public class StudyController {
         studyService.deleteStudy(studyNum);
 
         return ResponseEntity.noContent().build();
+    }
+    @PatchMapping("/{studyNum}/transfer-leader")
+    public ResponseEntity<StudyDetailResponseDto> transferLeader(@PathVariable Long studyNum, @Valid @RequestBody TransferLeaderRequestDto dto){
+        StudyDetailResponseDto study = studyService.transferLeader(studyNum, dto);
+        return ResponseEntity.ok(study);
+    }
+    @DeleteMapping("/{studyNum}/members/{userId}")
+    public ResponseEntity<Void> kickMember(@PathVariable Long studyNum, @PathVariable String userId){
+        userStudyService.kickMember(studyNum, userId);
+        return ResponseEntity.noContent().build();
+
+    }
+    @PatchMapping("/{studyNum}/status")
+    public ResponseEntity<StudyDetailResponseDto> updateStudyStatus(@PathVariable Long studyNum, @Valid @RequestBody UpdateStudyStatusDto dto){
+        StudyDetailResponseDto study = studyService.updateStudyStatus(studyNum, dto);
+        return ResponseEntity.ok(study);
     }
 }

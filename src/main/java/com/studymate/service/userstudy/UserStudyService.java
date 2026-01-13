@@ -9,6 +9,7 @@ import com.studymate.dto.userstudy.UserStudyResponseDto;
 import com.studymate.exception.ErrorCode;
 import com.studymate.exception.InvalidRequestException;
 import com.studymate.exception.study.StudyAccessDeniedException;
+import com.studymate.exception.study.StudyCapacityExceededException;
 import com.studymate.exception.study.StudyNotFoundException;
 import com.studymate.exception.user.UserNotFoundException;
 import com.studymate.exception.userstudy.AlreadyJoinedException;
@@ -56,7 +57,7 @@ public class UserStudyService {
 
         int currentMembers = userStudyRepository.countByStudy_StudyNum(dto.getStudyNum());
         if(currentMembers >= study.getMaxMember()){
-            throw new InvalidRequestException(ErrorCode.STUDY_CAPACITY_EXCEEDED);
+            throw new StudyCapacityExceededException(dto.getStudyNum());
         }
 
         UserStudy userStudy = UserStudy.builder()
@@ -105,6 +106,28 @@ public class UserStudyService {
         return userStudies.stream()
                 .map(UserStudyResponseDto::from)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void kickMember(Long studyNum, String userId){
+        User user = getCurrentUser();
+        Study study = studyRepository.findById(studyNum)
+                .orElseThrow(() -> new StudyNotFoundException(studyNum));
+
+        if(!study.getLeaderId().getUserNum().equals(user.getUserNum())){
+            throw new StudyAccessDeniedException(studyNum, userId);
+        }
+        if(userId.equals(user.getUserId())){
+            throw new InvalidRequestException(ErrorCode.SELF_KICK_NOT_ALLOWED);
+        }
+        User targetUser = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        UserStudy userStudy = userStudyRepository.findByUser_UserNumAndStudy_StudyNum(targetUser.getUserNum(), studyNum)
+                        .orElseThrow(() -> new UserStudyNotFoundException());
+
+        userStudyRepository.delete(userStudy);
+
     }
 
 }

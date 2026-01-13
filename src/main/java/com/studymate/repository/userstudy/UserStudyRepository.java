@@ -7,11 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserStudyRepository extends JpaRepository<UserStudy, Long> {
 
     boolean existsByUser_UserNumAndStudy_StudyNum(Long userNum, Long studyNum);
     int countByStudy_StudyNum(Long studyNum);
+    Optional<UserStudy> findByUser_UserNumAndStudy_StudyNum(Long userNum, Long studyNum);
 
     @Query("SELECT us FROM UserStudy us JOIN FETCH us.user WHERE us.study.studyNum = :studyNum")
     List<UserStudy> findByStudyNumWithUser(@Param("studyNum") Long studyNum);
